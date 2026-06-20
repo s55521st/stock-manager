@@ -340,13 +340,16 @@ def get_portfolio_forecast(stocks, api_key):
         hist = get_stock_history(stock["ticker"])
         if hist is None or hist.empty:
             continue
-        current = float(hist["Close"].iloc[-1])
-        ma25    = float(hist["Close"].rolling(25).mean().iloc[-1])
-        ma75    = float(hist["Close"].rolling(75).mean().iloc[-1])
-        high52  = float(hist["Close"].tail(252).max())
-        low52   = float(hist["Close"].tail(252).min())
-        chg1m   = (current / hist["Close"].iloc[-21] - 1) * 100 if len(hist) > 21 else 0
-        chg3m   = (current / hist["Close"].iloc[-63] - 1) * 100 if len(hist) > 63 else 0
+        close   = hist["Close"].dropna()
+        if close.empty:
+            continue
+        current = float(close.iloc[-1])
+        ma25    = float(close.rolling(25).mean().iloc[-1])
+        ma75    = float(close.rolling(75).mean().iloc[-1])
+        high52  = float(close.tail(252).max())
+        low52   = float(close.tail(252).min())
+        chg1m   = (current / close.iloc[-21] - 1) * 100 if len(close) > 21 else 0
+        chg3m   = (current / close.iloc[-63] - 1) * 100 if len(close) > 63 else 0
         is_jpy  = stock["ticker"].endswith(".T")
         val_jpy = current * qty if is_jpy else current * qty * usdjpy
         total_current_jpy += val_jpy
@@ -363,7 +366,7 @@ def get_portfolio_forecast(stocks, api_key):
         return None
 
     lines = "\n".join(
-        f"- {s['name']}（{s['ticker']}）: 保有{s['quantity']}株, "
+        f"- {s['name']}（{s['ticker']}）: 保有{s['quantity']}{'枚' if _is_crypto(s['ticker']) else '株'}, "
         f"現在{s['current_price']:.2f}{s['ccy']}, "
         f"25日MA {s['ma25']:.2f}, 75日MA {s['ma75']:.2f}, "
         f"52週高値 {s['high52']:.2f} / 安値 {s['low52']:.2f}, "
