@@ -481,9 +481,23 @@ html, body, [class*="css"], .stMarkdown, .stMetric {
     border-color: #0071e3 !important;
     background: #2c2c2e !important;
 }
-[data-testid="stMarkdown"]:has(.portfolio-list-start) ~ [data-testid="stButton"] > button:first-line {
-    font-size: 1.1rem !important;
+[data-testid="stMarkdown"]:has(.portfolio-list-start) ~ [data-testid="stButton"] > button p {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.85 !important;
+    color: inherit !important;
+}
+[data-testid="stMarkdown"]:has(.portfolio-list-start) ~ [data-testid="stButton"] > button p:first-child {
+    font-size: 1.05rem !important;
     font-weight: 700 !important;
+}
+[data-testid="stMarkdown"]:has(.portfolio-list-start) ~ [data-testid="stButton"] > button p:nth-child(2) {
+    font-size: 0.88rem !important;
+    color: #a1a1a6 !important;
+}
+[data-testid="stMarkdown"]:has(.portfolio-list-start) ~ [data-testid="stButton"] > button p:nth-child(3) {
+    font-size: 0.85rem !important;
+    color: #8e8e93 !important;
 }
 /* ── Tab bar ── */
 .stButton > button {
@@ -787,7 +801,7 @@ def main():
                     else:
                         line3 = f"評価額 {value_str}"
 
-                    label = f"{line1}\n{line2}\n{line3}"
+                    label = f"{line1}\n\n{line2}\n\n{line3}"
                     _stock_idx = next(
                         (i for i, s in enumerate(stocks) if s["ticker"] == r["ticker"]), 0
                     )
