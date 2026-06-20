@@ -517,6 +517,8 @@ html, body, [class*="css"], .stMarkdown, .stMetric {
     /* タイトル */
     .apple-title { font-size: 1.5rem !important; }
     .apple-section { font-size: 1.1rem !important; margin: 16px 0 10px !important; }
+    [data-testid="stHeading"] h2,
+    [data-testid="stHeading"] h3 { font-size: 1.1rem !important; }
 
     /* メトリクスカード: 縦並び時の余白 */
     .apple-metric { padding: 12px 14px !important; margin-bottom: 10px !important; }
@@ -806,7 +808,10 @@ def main():
                     else:
                         d_chg = f":red[▼ {abs(r['day_chg']):.2f}%]"
 
-                    line1 = f"{r['name']}"
+                    _name = r['name'].split(' - ')[0].strip()
+                    if len(_name) > 18:
+                        _name = _name[:18] + "…"
+                    line1 = _name
                     line2 = f"{r['ticker']}    {price_str}  ×{r['qty']:,}株    {d_chg}"
                     if r["pl"] is not None:
                         pl_str = f"¥{r['pl']:+,.0f}（{r['pl_pct']:+.2f}%）"
