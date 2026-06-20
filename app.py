@@ -72,6 +72,10 @@ def _load_jp_stocks():
 def _has_japanese(text):
     return any("　" <= c <= "鿿" or "＀" <= c <= "￯" for c in text)
 
+def _is_crypto(ticker):
+    parts = ticker.upper().split("-")
+    return len(parts) == 2 and parts[1] in ("USD", "JPY", "EUR", "GBP", "USDT", "BTC")
+
 def _search_jp_stocks(query):
     q = query.lower().strip()
     pat_word = re.compile(r'(?<![a-z0-9])' + re.escape(q) + r'(?![a-z0-9])', re.I)
@@ -629,16 +633,29 @@ def main():
             new_ticker = st.text_input(
                 "ティッカー（直接入力も可）",
                 value=ticker_default,
-                placeholder="例: 7203.T / AAPL",
+                placeholder="例: 7203.T / AAPL / BTC-USD",
                 key=f"ticker_{fk}",
             )
-            new_qty = st.number_input("保有数量（株）", min_value=0, value=100, step=1, key=f"qty_{fk}")
-            is_jpy_add = (new_ticker or ticker_default).upper().endswith(".T")
+            _t_detect = (new_ticker or ticker_default).strip().upper()
+            is_jpy_add    = _t_detect.endswith(".T")
+            is_crypto_add = _is_crypto(_t_detect)
+            if is_crypto_add:
+                new_qty = st.number_input(
+                    "保有数量（枚）", min_value=0.0, value=0.0, step=0.0001,
+                    format="%.6f", key=f"qty_{fk}"
+                )
+            else:
+                new_qty = st.number_input("保有数量（株）", min_value=0, value=100, step=1, key=f"qty_{fk}")
             if is_jpy_add:
                 new_price = float(st.number_input(
                     "購入価格（円）", min_value=0, value=0, step=1,
                     help="0のままでも追加できます", key=f"price_{fk}",
                 ))
+            elif is_crypto_add:
+                new_price = st.number_input(
+                    "購入価格（ドル）", min_value=0.0, value=0.0, step=100.0,
+                    help="0のままでも追加できます", key=f"price_{fk}",
+                )
             else:
                 new_price = st.number_input(
                     "購入価格（ドル）", min_value=0.0, value=0.0, step=0.01,
@@ -812,7 +829,11 @@ def main():
                     if len(_name) > 18:
                         _name = _name[:18] + "…"
                     line1 = _name
-                    line2 = f"{r['ticker']}    {price_str}  ×{r['qty']:,}株    {d_chg}"
+                    if _is_crypto(r['ticker']):
+                        qty_str = f"×{r['qty']:g}枚"
+                    else:
+                        qty_str = f"×{int(r['qty']):,}株"
+                    line2 = f"{r['ticker']}    {price_str}  {qty_str}    {d_chg}"
                     if r["pl"] is not None:
                         pl_str = f"¥{r['pl']:+,.0f}（{r['pl_pct']:+.2f}%）"
                         pl_colored = f":green[{pl_str}]" if r["pl"] >= 0 else f":red[{pl_str}]"
@@ -968,7 +989,9 @@ def main():
                 c1, c2, c3, c4 = st.columns(4)
                 c1.metric("現在値", fmt_price(current_price),
                           f"{change:+.0f}  ({change_pct:+.2f}%)" if is_jpy else f"{change:+.2f}  ({change_pct:+.2f}%)")
-                c2.metric("保有数量", f"{stock['quantity']:,} 株")
+                _qty_unit = "枚" if _is_crypto(ticker) else "株"
+                _qty_disp = f"{stock['quantity']:g}" if _is_crypto(ticker) else f"{int(stock['quantity']):,}"
+                c2.metric("保有数量", f"{_qty_disp} {_qty_unit}")
                 if stock["purchase_price"] > 0:
                     pl = (current_price - stock["purchase_price"]) * stock["quantity"]
                     pl_pct = (current_price - stock["purchase_price"]) / stock["purchase_price"] * 100
