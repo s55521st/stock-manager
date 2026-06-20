@@ -271,8 +271,9 @@ def get_portfolio_summary(ticker_keys):
         hist = get_stock_history(ticker)
         if hist is None or hist.empty:
             continue
-        current = float(hist["Close"].iloc[-1])
-        prev    = float(hist["Close"].iloc[-2]) if len(hist) > 1 else current
+        close   = hist["Close"].dropna()
+        current = float(close.iloc[-1])
+        prev    = float(close.iloc[-2]) if len(close) > 1 else current
         is_jpy  = ticker.endswith(".T")
         rate    = 1.0 if is_jpy else usdjpy
         value   = current * qty * rate
@@ -903,8 +904,9 @@ def main():
             if hist is None or hist.empty:
                 st.error(f"「{ticker}」のデータを取得できませんでした。ティッカーを確認してください。")
             else:
-                current_price = hist["Close"].iloc[-1]
-                prev_price = hist["Close"].iloc[-2]
+                close = hist["Close"].dropna()
+                current_price = float(close.iloc[-1])
+                prev_price = float(close.iloc[-2]) if len(close) > 1 else current_price
                 change = current_price - prev_price
                 change_pct = change / prev_price * 100
                 is_jpy = ticker.endswith(".T")
