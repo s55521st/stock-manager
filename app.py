@@ -427,6 +427,7 @@ html, body, [class*="css"], .stMarkdown, .stMetric {
     padding: 20px 22px;
     border: 1px solid #2c2c2e;
     height: 100%;
+    margin-bottom: 10px;
 }
 .apple-metric .label {
     font-size: 0.78rem; font-weight: 500;
@@ -517,16 +518,8 @@ html, body, [class*="css"], .stMarkdown, .stMetric {
     .apple-title { font-size: 1.5rem !important; }
     .apple-section { font-size: 1.1rem !important; margin: 16px 0 10px !important; }
 
-    /* メトリクスカード 4列 → 2×2 */
-    [data-testid="stHorizontalBlock"]:has(> [data-testid="column"]:nth-child(4)) {
-        flex-wrap: wrap !important;
-        gap: 8px !important;
-    }
-    [data-testid="stHorizontalBlock"]:has(> [data-testid="column"]:nth-child(4)) > [data-testid="column"] {
-        flex: 0 0 calc(50% - 4px) !important;
-        min-width: calc(50% - 4px) !important;
-    }
-    .apple-metric { padding: 12px 14px !important; }
+    /* メトリクスカード: 縦並び時の余白 */
+    .apple-metric { padding: 12px 14px !important; margin-bottom: 10px !important; }
     .apple-metric .value { font-size: 1.2rem !important; }
     .apple-metric .label { font-size: 0.65rem !important; }
     .apple-metric .sub { font-size: 0.75rem !important; }
