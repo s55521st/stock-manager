@@ -848,7 +848,12 @@ def main():
                 st.markdown('<div class="portfolio-list-start"></div>', unsafe_allow_html=True)
 
                 for r in rows:
-                    price_str = f"¥{r['current']:,.0f}" if r["is_jpy"] else f"${r['current']:,.2f}"
+                    if r["is_jpy"]:
+                        price_str = f"¥{r['current']:,.0f}"
+                    elif _is_crypto(r["ticker"]):
+                        price_str = f"¥{r['current'] * usdjpy:,.0f}（${r['current']:,.0f}）"
+                    else:
+                        price_str = f"¥{r['current'] * usdjpy:,.0f}"
                     value_str = f"¥{r['value']:,.0f}"
                     if r["day_chg"] >= 0:
                         d_chg = f":green[▲ {abs(r['day_chg']):.2f}%]"
