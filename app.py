@@ -746,7 +746,10 @@ def main():
                 day_sign    = "+" if total_day >= 0 else ""
                 pl_cls      = "up" if total_pl >= 0 else "down"
 
-                c1, c2, c3, c4 = st.columns(4)
+                total_cost = sum(r["cost"] for r in rows if r["cost"] is not None)
+                has_cost   = any(r["cost"] is not None for r in rows)
+
+                c1, c2, c3, c4, c5 = st.columns(5)
                 c1.markdown(f"""
 <div class="apple-metric">
   <div class="label">合計評価額</div>
@@ -772,7 +775,20 @@ def main():
   <div class="label">含み損益合計</div>
   <div class="value" style="color:#636366">—</div>
 </div>""", unsafe_allow_html=True)
-                c4.markdown(f"""
+                if has_cost:
+                    c4.markdown(f"""
+<div class="apple-metric">
+  <div class="label">投資金額</div>
+  <div class="value">¥{total_cost:,.0f}</div>
+  <div class="sub" style="color:#636366">取得原価</div>
+</div>""", unsafe_allow_html=True)
+                else:
+                    c4.markdown("""
+<div class="apple-metric">
+  <div class="label">投資金額</div>
+  <div class="value" style="color:#636366">—</div>
+</div>""", unsafe_allow_html=True)
+                c5.markdown(f"""
 <div class="apple-metric">
   <div class="label">保有銘柄数</div>
   <div class="value">{len(rows)}</div>
