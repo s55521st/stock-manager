@@ -1037,18 +1037,33 @@ def main():
 
                 c1, c2, c3, c4 = st.columns(4)
                 c1.metric("現在値", fmt_price(current_price), fmt_chg(change))
-                _qty_unit = "枚" if _is_crypto(ticker) else "株"
-                _qty_disp = f"{stock['quantity']:g}" if _is_crypto(ticker) else f"{int(stock['quantity']):,}"
-                c2.metric("保有数量", f"{_qty_disp} {_qty_unit}")
-                if stock["purchase_price"] > 0:
-                    pl = (current_price - stock["purchase_price"]) * stock["quantity"]
-                    pl_pct = (current_price - stock["purchase_price"]) / stock["purchase_price"] * 100
-                    c3.metric("購入価格", fmt_price(stock["purchase_price"]))
-                    pl_disp = f"¥{pl * disp_rate:+,.0f}" if disp_jpy else f"${pl:+,.2f}"
-                    c4.metric("評価損益", pl_disp, f"{pl_pct:+.2f}%")
+
+                _is_cr = _is_crypto(ticker)
+                _qty_unit = "枚" if _is_cr else "株"
+                _qty_disp = f"{stock['quantity']:g}" if _is_cr else f"{int(stock['quantity']):,}"
+                c2.metric("保有コイン数" if _is_cr else "保有数量", f"{_qty_disp} {_qty_unit}")
+
+                if _is_cr:
+                    _val = current_price * stock["quantity"]
+                    _val_str = f"¥{_val * disp_rate:,.0f}" if disp_jpy else f"${_val:,.2f}"
+                    c3.metric("評価額", _val_str)
+                    if stock["purchase_price"] > 0:
+                        pl = (current_price - stock["purchase_price"]) * stock["quantity"]
+                        pl_pct = (current_price - stock["purchase_price"]) / stock["purchase_price"] * 100
+                        pl_disp = f"¥{pl * disp_rate:+,.0f}" if disp_jpy else f"${pl:+,.2f}"
+                        c4.metric("評価損益", pl_disp, f"{pl_pct:+.2f}%")
+                    else:
+                        c4.metric("52週安値", fmt_price(hist["Close"].tail(252).min()))
                 else:
-                    c3.metric("52週高値", fmt_price(hist["Close"].tail(252).max()))
-                    c4.metric("52週安値", fmt_price(hist["Close"].tail(252).min()))
+                    if stock["purchase_price"] > 0:
+                        pl = (current_price - stock["purchase_price"]) * stock["quantity"]
+                        pl_pct = (current_price - stock["purchase_price"]) / stock["purchase_price"] * 100
+                        c3.metric("購入価格", fmt_price(stock["purchase_price"]))
+                        pl_disp = f"¥{pl * disp_rate:+,.0f}" if disp_jpy else f"${pl:+,.2f}"
+                        c4.metric("評価損益", pl_disp, f"{pl_pct:+.2f}%")
+                    else:
+                        c3.metric("52週高値", fmt_price(hist["Close"].tail(252).max()))
+                        c4.metric("52週安値", fmt_price(hist["Close"].tail(252).min()))
 
                 inner1, inner2, inner3 = st.tabs(["📊 チャート", "🤖 AI考察", "📰 ニュース"])
 
