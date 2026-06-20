@@ -485,19 +485,21 @@ html, body, [class*="css"], .stMarkdown, .stMetric {
     margin: 0 !important;
     padding: 0 !important;
     line-height: 1.85 !important;
+    text-align: left !important;
     color: inherit !important;
 }
 [data-testid="stMarkdown"]:has(.portfolio-list-start) ~ [data-testid="stButton"] > button p:first-child {
     font-size: 1.05rem !important;
     font-weight: 700 !important;
+    color: #f5f5f7 !important;
 }
 [data-testid="stMarkdown"]:has(.portfolio-list-start) ~ [data-testid="stButton"] > button p:nth-child(2) {
     font-size: 0.88rem !important;
-    color: #a1a1a6 !important;
+    color: #c0c0c5 !important;
 }
 [data-testid="stMarkdown"]:has(.portfolio-list-start) ~ [data-testid="stButton"] > button p:nth-child(3) {
     font-size: 0.85rem !important;
-    color: #8e8e93 !important;
+    color: #a1a1a6 !important;
 }
 /* ── Tab bar ── */
 .stButton > button {
@@ -790,14 +792,17 @@ def main():
                 for r in rows:
                     price_str = f"¥{r['current']:,.0f}" if r["is_jpy"] else f"${r['current']:,.2f}"
                     value_str = f"¥{r['value']:,.0f}"
-                    d_sign = "▲" if r["day_chg"] >= 0 else "▼"
-                    d_chg  = f"{d_sign} {abs(r['day_chg']):.2f}%"
+                    if r["day_chg"] >= 0:
+                        d_chg = f":green[▲ {abs(r['day_chg']):.2f}%]"
+                    else:
+                        d_chg = f":red[▼ {abs(r['day_chg']):.2f}%]"
 
                     line1 = f"{r['name']}"
                     line2 = f"{r['ticker']}    {price_str}  ×{r['qty']:,}株    {d_chg}"
                     if r["pl"] is not None:
-                        pl_sign = "+" if r["pl"] >= 0 else ""
-                        line3 = f"評価額 {value_str}    損益 ¥{r['pl']:+,.0f}（{r['pl_pct']:+.2f}%）"
+                        pl_str = f"¥{r['pl']:+,.0f}（{r['pl_pct']:+.2f}%）"
+                        pl_colored = f":green[{pl_str}]" if r["pl"] >= 0 else f":red[{pl_str}]"
+                        line3 = f"評価額 {value_str}    損益 {pl_colored}"
                     else:
                         line3 = f"評価額 {value_str}"
 
