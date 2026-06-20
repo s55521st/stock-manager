@@ -18,7 +18,7 @@ ENV_FILE = os.path.join(BASE_DIR, ".env")
 load_dotenv(ENV_FILE)
 
 st.set_page_config(
-    page_title="株式ポートフォリオ管理",
+    page_title="ポートフォリオ管理",
     page_icon="📈",
     layout="wide"
 )
@@ -575,7 +575,7 @@ html, body, [class*="css"], .stMarkdown, .stMetric {
 
 def main():
     st.markdown(APPLE_CSS, unsafe_allow_html=True)
-    st.markdown('<div class="apple-title">📈 株式ポートフォリオ管理</div>', unsafe_allow_html=True)
+    st.markdown('<div class="apple-title">📈 ポートフォリオ管理</div>', unsafe_allow_html=True)
 
     if "portfolio" not in st.session_state:
         st.session_state.portfolio = load_portfolio()
