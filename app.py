@@ -459,6 +459,26 @@ html, body, [class*="css"], .stMarkdown, .stMetric {
 .down { color: #ff453a; }
 /* ── Divider ── */
 .apple-divider { border:none; border-top: 1px solid #2c2c2e; margin: 8px 0 18px; }
+/* ── Clickable card overlay ── */
+.stock-card { min-height: 88px; cursor: pointer !important; }
+.stock-card:hover { border-color: #0071e3 !important; }
+[data-testid="stMarkdown"]:has(.stock-card) + [data-testid="stButton"] {
+    margin-top: -108px !important;
+    height: 108px !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+[data-testid="stMarkdown"]:has(.stock-card) + [data-testid="stButton"] > button {
+    position: absolute !important;
+    inset: 10px 0 0 0 !important;
+    width: 100% !important;
+    height: calc(100% - 10px) !important;
+    opacity: 0 !important;
+    cursor: pointer !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 18px !important;
+}
 /* ── Tab bar ── */
 .stButton > button {
     border-radius: 10px !important;
@@ -488,15 +508,6 @@ html, body, [class*="css"], .stMarkdown, .stMetric {
     .apple-metric .value { font-size: 1.2rem !important; }
     .apple-metric .label { font-size: 0.65rem !important; }
     .apple-metric .sub { font-size: 0.75rem !important; }
-
-    /* 株カード行: 折り返しを防ぐ */
-    [data-testid="stHorizontalBlock"]:has(.stock-card) {
-        flex-wrap: nowrap !important;
-        align-items: stretch !important;
-    }
-    [data-testid="stHorizontalBlock"]:has(.stock-card) > [data-testid="column"] {
-        min-width: 0 !important;
-    }
 
     /* 株カード内レイアウト: 2列グリッドに組み替え */
     .stock-card {
@@ -805,9 +816,10 @@ def main():
                     else:
                         pl_html = '<div class="sc-val" style="color:#636366">—</div><div class="sc-label">損益</div>'
 
-                    _col_card, _col_nav = st.columns([11, 1])
-                    with _col_card:
-                        st.markdown(f"""
+                    _stock_idx = next(
+                        (i for i, s in enumerate(stocks) if s["ticker"] == r["ticker"]), 0
+                    )
+                    st.markdown(f"""
 <div class="stock-card">
   <div style="flex:3;min-width:0">
     <div class="sc-name">{r['name']}</div>
@@ -829,19 +841,15 @@ def main():
     {pl_html}
   </div>
 </div>""", unsafe_allow_html=True)
-                    with _col_nav:
-                        _stock_idx = next(
-                            (i for i, s in enumerate(stocks) if s["ticker"] == r["ticker"]), 0
-                        )
-                        if st.button(
-                            "📈",
-                            key=f"nav_{r['ticker']}",
-                            use_container_width=True,
-                            help=f"{r['name']}のチャートを見る"
-                        ):
-                            st.session_state.selected_stock_idx = _stock_idx
-                            st.session_state.active_tab = "stock"
-                            st.rerun()
+                    if st.button(
+                        "",
+                        key=f"nav_{r['ticker']}",
+                        use_container_width=True,
+                        help=f"{r['name']}のチャートを見る"
+                    ):
+                        st.session_state.selected_stock_idx = _stock_idx
+                        st.session_state.active_tab = "stock"
+                        st.rerun()
 
                 st.markdown(
                     f'<div style="font-size:0.75rem;color:#636366;margin-top:12px">'
