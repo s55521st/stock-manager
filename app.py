@@ -1013,12 +1013,30 @@ def main():
                 change_pct = change / prev_price * 100
                 is_jpy = ticker.endswith(".T")
 
+                # 円/ドル切り替え（米国株・暗号資産のみ表示）
+                if not is_jpy:
+                    _usdjpy_disp = get_usdjpy_rate()
+                    _col_tog, _ = st.columns([2, 8])
+                    with _col_tog:
+                        show_jpy = st.toggle("💴 円表示", value=True, key=f"show_jpy_{ticker}")
+                    disp_rate = _usdjpy_disp if show_jpy else 1.0
+                    disp_jpy  = show_jpy
+                else:
+                    disp_rate = 1.0
+                    disp_jpy  = True
+
                 def fmt_price(p):
-                    return f"¥{p:,.0f}" if is_jpy else f"${p:,.2f}"
+                    if disp_jpy:
+                        return f"¥{p * disp_rate:,.0f}"
+                    return f"${p:,.2f}"
+
+                def fmt_chg(p):
+                    if disp_jpy:
+                        return f"¥{p * disp_rate:+,.0f}  ({change_pct:+.2f}%)"
+                    return f"${p:+.2f}  ({change_pct:+.2f}%)"
 
                 c1, c2, c3, c4 = st.columns(4)
-                c1.metric("現在値", fmt_price(current_price),
-                          f"{change:+.0f}  ({change_pct:+.2f}%)" if is_jpy else f"{change:+.2f}  ({change_pct:+.2f}%)")
+                c1.metric("現在値", fmt_price(current_price), fmt_chg(change))
                 _qty_unit = "枚" if _is_crypto(ticker) else "株"
                 _qty_disp = f"{stock['quantity']:g}" if _is_crypto(ticker) else f"{int(stock['quantity']):,}"
                 c2.metric("保有数量", f"{_qty_disp} {_qty_unit}")
@@ -1026,7 +1044,8 @@ def main():
                     pl = (current_price - stock["purchase_price"]) * stock["quantity"]
                     pl_pct = (current_price - stock["purchase_price"]) / stock["purchase_price"] * 100
                     c3.metric("購入価格", fmt_price(stock["purchase_price"]))
-                    c4.metric("評価損益", f"¥{pl:+,.0f}" if is_jpy else f"${pl:+,.2f}", f"{pl_pct:+.2f}%")
+                    pl_disp = f"¥{pl * disp_rate:+,.0f}" if disp_jpy else f"${pl:+,.2f}"
+                    c4.metric("評価損益", pl_disp, f"{pl_pct:+.2f}%")
                 else:
                     c3.metric("52週高値", fmt_price(hist["Close"].tail(252).max()))
                     c4.metric("52週安値", fmt_price(hist["Close"].tail(252).min()))
