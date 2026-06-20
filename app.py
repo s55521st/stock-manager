@@ -459,25 +459,31 @@ html, body, [class*="css"], .stMarkdown, .stMetric {
 .down { color: #ff453a; }
 /* ── Divider ── */
 .apple-divider { border:none; border-top: 1px solid #2c2c2e; margin: 8px 0 18px; }
-/* ── Clickable card overlay ── */
-.stock-card { min-height: 88px; cursor: pointer !important; }
-.stock-card:hover { border-color: #0071e3 !important; }
-[data-testid="stMarkdown"]:has(.stock-card) + [data-testid="stButton"] {
-    margin-top: -108px !important;
-    height: 108px !important;
-    position: relative !important;
-    z-index: 2 !important;
-}
-[data-testid="stMarkdown"]:has(.stock-card) + [data-testid="stButton"] > button {
-    position: absolute !important;
-    inset: 10px 0 0 0 !important;
-    width: 100% !important;
-    height: calc(100% - 10px) !important;
-    opacity: 0 !important;
-    cursor: pointer !important;
-    background: transparent !important;
-    border: none !important;
+/* ── Stock card buttons (portfolio list) ── */
+[data-testid="stMarkdown"]:has(.portfolio-list-start) ~ [data-testid="stButton"] > button {
+    background: #1c1c1e !important;
+    border: 1px solid #2c2c2e !important;
     border-radius: 18px !important;
+    padding: 18px 22px !important;
+    text-align: left !important;
+    color: #f5f5f7 !important;
+    height: auto !important;
+    white-space: pre-line !important;
+    line-height: 1.85 !important;
+    font-size: 0.95rem !important;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif !important;
+    font-weight: 400 !important;
+    width: 100% !important;
+    margin-bottom: 4px !important;
+    letter-spacing: -0.1px !important;
+}
+[data-testid="stMarkdown"]:has(.portfolio-list-start) ~ [data-testid="stButton"] > button:hover {
+    border-color: #0071e3 !important;
+    background: #2c2c2e !important;
+}
+[data-testid="stMarkdown"]:has(.portfolio-list-start) ~ [data-testid="stButton"] > button:first-line {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
 }
 /* ── Tab bar ── */
 .stButton > button {
@@ -509,50 +515,12 @@ html, body, [class*="css"], .stMarkdown, .stMetric {
     .apple-metric .label { font-size: 0.65rem !important; }
     .apple-metric .sub { font-size: 0.75rem !important; }
 
-    /* 株カード内レイアウト: 2列グリッドに組み替え */
-    .stock-card {
-        flex-wrap: wrap !important;
+    /* Stock card buttons on mobile */
+    [data-testid="stMarkdown"]:has(.portfolio-list-start) ~ [data-testid="stButton"] > button {
         padding: 14px 16px !important;
-        gap: 6px 0 !important;
-        align-items: flex-start !important;
+        line-height: 1.75 !important;
+        font-size: 0.88rem !important;
     }
-    /* 銘柄名+ティッカー: 70% (左) */
-    .stock-card > div:nth-child(1) {
-        order: 1 !important; flex: 0 0 70% !important; min-width: 0 !important;
-    }
-    /* 前日比: 30% (右、名前と同じ行) */
-    .stock-card > div:nth-child(4) {
-        order: 2 !important; flex: 0 0 30% !important;
-        text-align: right !important; min-width: 0 !important;
-    }
-    /* 株価+株数: 50% (左) */
-    .stock-card > div:nth-child(2) {
-        order: 3 !important; flex: 0 0 50% !important;
-        text-align: left !important; min-width: 0 !important;
-    }
-    /* 評価額: 50% (右) */
-    .stock-card > div:nth-child(3) {
-        order: 4 !important; flex: 0 0 50% !important;
-        text-align: right !important; min-width: 0 !important;
-    }
-    /* 損益: 100% (右寄せ) */
-    .stock-card > div:nth-child(5) {
-        order: 5 !important; flex: 0 0 100% !important;
-        text-align: right !important; min-width: 0 !important;
-        border-top: 1px solid #2c2c2e !important;
-        padding-top: 6px !important; margin-top: 2px !important;
-    }
-
-    /* フォントサイズ */
-    .sc-name {
-        font-size: 1rem !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-    }
-    .sc-val { font-size: 1rem !important; }
-    .sc-label { font-size: 0.72rem !important; }
-    .sc-sub { font-size: 0.7rem !important; }
 
     /* タブボタン: タップしやすく */
     .stButton > button { min-height: 48px !important; font-size: 0.9rem !important; }
@@ -803,50 +771,27 @@ def main():
 </div>""", unsafe_allow_html=True)
 
                 st.markdown('<div class="apple-section">保有株一覧</div>', unsafe_allow_html=True)
+                st.markdown('<div class="portfolio-list-start"></div>', unsafe_allow_html=True)
 
                 for r in rows:
                     price_str = f"¥{r['current']:,.0f}" if r["is_jpy"] else f"${r['current']:,.2f}"
                     value_str = f"¥{r['value']:,.0f}"
-                    d_cls  = "up" if r["day_chg"] >= 0 else "down"
                     d_sign = "▲" if r["day_chg"] >= 0 else "▼"
+                    d_chg  = f"{d_sign} {abs(r['day_chg']):.2f}%"
 
+                    line1 = f"{r['name']}"
+                    line2 = f"{r['ticker']}    {price_str}  ×{r['qty']:,}株    {d_chg}"
                     if r["pl"] is not None:
-                        p_cls = "up" if r["pl"] >= 0 else "down"
-                        pl_html = f'<div class="sc-val {p_cls}">¥{r["pl"]:+,.0f}</div><div class="sc-label {p_cls}">{r["pl_pct"]:+.2f}%</div>'
+                        pl_sign = "+" if r["pl"] >= 0 else ""
+                        line3 = f"評価額 {value_str}    損益 ¥{r['pl']:+,.0f}（{r['pl_pct']:+.2f}%）"
                     else:
-                        pl_html = '<div class="sc-val" style="color:#636366">—</div><div class="sc-label">損益</div>'
+                        line3 = f"評価額 {value_str}"
 
+                    label = f"{line1}\n{line2}\n{line3}"
                     _stock_idx = next(
                         (i for i, s in enumerate(stocks) if s["ticker"] == r["ticker"]), 0
                     )
-                    st.markdown(f"""
-<div class="stock-card">
-  <div style="flex:3;min-width:0">
-    <div class="sc-name">{r['name']}</div>
-    <div class="sc-sub">{r['ticker']}</div>
-  </div>
-  <div style="flex:2;text-align:right">
-    <div class="sc-val">{price_str}</div>
-    <div class="sc-label">{r['qty']:,} 株</div>
-  </div>
-  <div style="flex:2;text-align:right">
-    <div class="sc-val">{value_str}</div>
-    <div class="sc-label">評価額</div>
-  </div>
-  <div style="flex:2;text-align:right">
-    <div class="sc-val {d_cls}">{d_sign} {abs(r['day_chg']):.2f}%</div>
-    <div class="sc-label">前日比</div>
-  </div>
-  <div style="flex:2;text-align:right">
-    {pl_html}
-  </div>
-</div>""", unsafe_allow_html=True)
-                    if st.button(
-                        "",
-                        key=f"nav_{r['ticker']}",
-                        use_container_width=True,
-                        help=f"{r['name']}のチャートを見る"
-                    ):
+                    if st.button(label, key=f"card_{r['ticker']}", use_container_width=True):
                         st.session_state.selected_stock_idx = _stock_idx
                         st.session_state.active_tab = "stock"
                         st.rerun()
