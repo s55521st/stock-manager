@@ -1057,6 +1057,16 @@ def main():
                         pl_pct = (current_price - stock["purchase_price"]) / stock["purchase_price"] * 100
                         pl_disp = f"¥{pl * disp_rate:+,.0f}" if disp_jpy else f"${pl:+,.2f}"
                         c4.metric("評価損益", pl_disp, f"{pl_pct:+.2f}%")
+                        # 取得コストの内訳（検証用）
+                        _cost_usd = stock["purchase_price"] * stock["quantity"]
+                        _cost_jpy = _cost_usd * disp_rate
+                        st.caption(
+                            f"取得単価 **${stock['purchase_price']:,.2f}** × {stock['quantity']:g}枚"
+                            f" × ¥{disp_rate:,.1f} = 取得コスト **¥{_cost_jpy:,.0f}**"
+                            if disp_jpy else
+                            f"取得単価 **${stock['purchase_price']:,.2f}** × {stock['quantity']:g}枚"
+                            f" = 取得コスト **${_cost_usd:,.2f}**"
+                        )
                     else:
                         c4.metric("52週安値", fmt_price(hist["Close"].tail(252).min()))
                 else:
