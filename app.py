@@ -678,18 +678,18 @@ def main():
                 new_qty = st.number_input("保有数量（株）", min_value=0, value=100, step=1, key=f"qty_{fk}")
             if is_jpy_add:
                 new_price = float(st.number_input(
-                    "購入価格（円）", min_value=0, value=0, step=1,
-                    help="0のままでも追加できます", key=f"price_{fk}",
+                    "購入単価（円/株）", min_value=0, value=0, step=1,
+                    help="購入時の1株あたりの価格。0のままでも追加できます（損益は非表示）", key=f"price_{fk}",
                 ))
             elif is_crypto_add:
                 new_price = st.number_input(
-                    "購入価格（ドル）", min_value=0.0, value=0.0, step=100.0,
-                    help="0のままでも追加できます", key=f"price_{fk}",
+                    "購入単価（ドル/枚）", min_value=0.0, value=0.0, step=100.0,
+                    help="購入時の1枚あたりの価格（例：$108,000で買ったなら 108000）。0のままでも追加できます（損益は非表示）", key=f"price_{fk}",
                 )
             else:
                 new_price = st.number_input(
-                    "購入価格（ドル）", min_value=0.0, value=0.0, step=0.01,
-                    help="0のままでも追加できます", key=f"price_{fk}",
+                    "購入単価（ドル/株）", min_value=0.0, value=0.0, step=0.01,
+                    help="購入時の1株あたりの価格。0のままでも追加できます（損益は非表示）", key=f"price_{fk}",
                 )
             if st.button("追加する", type="primary", use_container_width=True, key=f"add_{fk}"):
                 final_ticker = new_ticker.strip().upper() if new_ticker else ticker_default
