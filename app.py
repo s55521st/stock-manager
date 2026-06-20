@@ -76,6 +76,31 @@ def _is_crypto(ticker):
     parts = ticker.upper().split("-")
     return len(parts) == 2 and parts[1] in ("USD", "JPY", "EUR", "GBP", "USDT", "BTC")
 
+_CRYPTO_LIST = [
+    {"symbol": "BTC-USD",  "longname": "ビットコイン",       "shortname": "Bitcoin",  "keywords": ["btc", "bitcoin", "ビットコイン"]},
+    {"symbol": "ETH-USD",  "longname": "イーサリアム",       "shortname": "Ethereum", "keywords": ["eth", "ethereum", "イーサリアム"]},
+    {"symbol": "SOL-USD",  "longname": "ソラナ",             "shortname": "Solana",   "keywords": ["sol", "solana", "ソラナ"]},
+    {"symbol": "XRP-USD",  "longname": "リップル",           "shortname": "XRP",      "keywords": ["xrp", "ripple", "リップル"]},
+    {"symbol": "BNB-USD",  "longname": "バイナンスコイン",   "shortname": "BNB",      "keywords": ["bnb", "binance", "バイナンス"]},
+    {"symbol": "DOGE-USD", "longname": "ドージコイン",       "shortname": "Dogecoin", "keywords": ["doge", "dogecoin", "ドージ"]},
+    {"symbol": "ADA-USD",  "longname": "カルダノ",           "shortname": "Cardano",  "keywords": ["ada", "cardano", "カルダノ"]},
+    {"symbol": "AVAX-USD", "longname": "アバランチ",         "shortname": "Avalanche","keywords": ["avax", "avalanche", "アバランチ"]},
+]
+
+def _search_crypto(query):
+    q = query.lower().strip()
+    results = []
+    for c in _CRYPTO_LIST:
+        if q in c["symbol"].lower() or any(q in kw for kw in c["keywords"]):
+            results.append({
+                "symbol": c["symbol"],
+                "longname": c["longname"],
+                "shortname": c["shortname"],
+                "quoteType": "CRYPTOCURRENCY",
+                "exchDisp": "Crypto",
+            })
+    return results
+
 def _search_jp_stocks(query):
     q = query.lower().strip()
     pat_word = re.compile(r'(?<![a-z0-9])' + re.escape(q) + r'(?![a-z0-9])', re.I)
@@ -112,7 +137,12 @@ def _search_jp_stocks(query):
 
 @st.cache_data(ttl=300)
 def search_stocks(query):
-    # ローカル辞書で検索（日本語・英語・ティッカー共通）
+    # 暗号資産ローカル辞書
+    crypto = _search_crypto(query)
+    if crypto:
+        return crypto
+
+    # 日本株ローカル辞書
     local = _search_jp_stocks(query)
     if local:
         return local
@@ -137,7 +167,7 @@ def search_stocks(query):
     try:
         resp = requests.get(url, params=params, headers=headers, timeout=5)
         quotes = resp.json().get("quotes", [])
-        return [q for q in quotes if q.get("quoteType") in ("EQUITY", "ETF", "FUND")]
+        return [q for q in quotes if q.get("quoteType") in ("EQUITY", "ETF", "FUND", "CRYPTOCURRENCY")]
     except Exception:
         return []
 
