@@ -466,20 +466,85 @@ html, body, [class*="css"], .stMarkdown, .stMetric {
     font-size: 0.95rem !important;
     transition: all 0.15s !important;
 }
-/* ── Stock nav button (📈 per row) ── */
-.stock-nav-btn > button {
-    background: #2c2c2e !important;
-    border: 1px solid #3a3a3c !important;
-    border-radius: 12px !important;
-    color: #636366 !important;
-    font-size: 1.1rem !important;
-    padding: 8px !important;
-    margin-top: 10px !important;
-}
-.stock-nav-btn > button:hover {
-    background: #3a3a3c !important;
-    border-color: #0071e3 !important;
-    color: #0071e3 !important;
+
+/* ════════════════════════════════
+   モバイル (〜768px)
+   ════════════════════════════════ */
+@media (max-width: 768px) {
+    /* タイトル */
+    .apple-title { font-size: 1.5rem !important; }
+    .apple-section { font-size: 1.1rem !important; margin: 16px 0 10px !important; }
+
+    /* メトリクスカード 4列 → 2×2 */
+    [data-testid="stHorizontalBlock"]:has(> [data-testid="column"]:nth-child(4)) {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+    [data-testid="stHorizontalBlock"]:has(> [data-testid="column"]:nth-child(4)) > [data-testid="column"] {
+        flex: 0 0 calc(50% - 4px) !important;
+        min-width: calc(50% - 4px) !important;
+    }
+    .apple-metric { padding: 12px 14px !important; }
+    .apple-metric .value { font-size: 1.2rem !important; }
+    .apple-metric .label { font-size: 0.65rem !important; }
+    .apple-metric .sub { font-size: 0.75rem !important; }
+
+    /* 株カード行: 折り返しを防ぐ */
+    [data-testid="stHorizontalBlock"]:has(.stock-card) {
+        flex-wrap: nowrap !important;
+        align-items: stretch !important;
+    }
+    [data-testid="stHorizontalBlock"]:has(.stock-card) > [data-testid="column"] {
+        min-width: 0 !important;
+    }
+
+    /* 株カード内レイアウト: 2列グリッドに組み替え */
+    .stock-card {
+        flex-wrap: wrap !important;
+        padding: 14px 16px !important;
+        gap: 6px 0 !important;
+        align-items: flex-start !important;
+    }
+    /* 銘柄名+ティッカー: 70% (左) */
+    .stock-card > div:nth-child(1) {
+        order: 1 !important; flex: 0 0 70% !important; min-width: 0 !important;
+    }
+    /* 前日比: 30% (右、名前と同じ行) */
+    .stock-card > div:nth-child(4) {
+        order: 2 !important; flex: 0 0 30% !important;
+        text-align: right !important; min-width: 0 !important;
+    }
+    /* 株価+株数: 50% (左) */
+    .stock-card > div:nth-child(2) {
+        order: 3 !important; flex: 0 0 50% !important;
+        text-align: left !important; min-width: 0 !important;
+    }
+    /* 評価額: 50% (右) */
+    .stock-card > div:nth-child(3) {
+        order: 4 !important; flex: 0 0 50% !important;
+        text-align: right !important; min-width: 0 !important;
+    }
+    /* 損益: 100% (右寄せ) */
+    .stock-card > div:nth-child(5) {
+        order: 5 !important; flex: 0 0 100% !important;
+        text-align: right !important; min-width: 0 !important;
+        border-top: 1px solid #2c2c2e !important;
+        padding-top: 6px !important; margin-top: 2px !important;
+    }
+
+    /* フォントサイズ */
+    .sc-name {
+        font-size: 1rem !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    .sc-val { font-size: 1rem !important; }
+    .sc-label { font-size: 0.72rem !important; }
+    .sc-sub { font-size: 0.7rem !important; }
+
+    /* タブボタン: タップしやすく */
+    .stButton > button { min-height: 48px !important; font-size: 0.9rem !important; }
 }
 </style>
 """
